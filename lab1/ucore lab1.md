@@ -4,7 +4,7 @@
 
 - Q:操作系统镜像文件ucore.img是如何一步一步生成的？(需要比较详细地解释Makefile中每一条相关命令和命令参数的含义，以及说明命令导致的结果)
 - A:在Makefile里发现了关于生产ucore.img的注释，
-- ![image-20200803205630530](https://github.com/y-f00l/ucore_lab/tree/master/img/image-20200803205630530.png)https://github.com/y-f00l/ucore_lab/tree/master/img
+- ![image-20200803205630530](https://github.com/y-f00l/ucore_lab/tree/master/img/image-20200803205630530.png)
 - 用了dd命令，通过make "V="这个命令查看输出信息，dd命令是从input文件copy到output文件
 - ![image-20200803205815499](https://github.com/y-f00l/ucore_lab/edit/tree/img/image-20200803205815499.png)
 - 分别调用了三次dd命令分别把/dev/zero, bin/bootblock, bin/kernel，这三个copy到ucore.img文件里了。
