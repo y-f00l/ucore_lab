@@ -1,0 +1,11 @@
+#source ~/GdbPlugins/gef/gef.py
+file bin/kernel
+set architecture i8086
+target remote :1234
+define hook-stop
+x/2i $pc
+end
+b* 0x7c00
+c
+set architecture i386
+break kern_init
