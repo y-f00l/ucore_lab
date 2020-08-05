@@ -66,7 +66,7 @@
 
 - Q:中断描述符表中一个表项占多少字节？其中哪几位代表中断处理代码的入口
 - A:一个表项占8字节
-- ![image-20200805104538057](/Users/g1ft/Library/Application Support/typora-user-images/image-20200805104538057.png)16-31位表示了相应的段选择子，根据这个到GDT里找到对应的段描述符拿到中断处理代码的段基地址，然后0-15位,48-63位共同组成了offset，根据这个base addr + offset就找到了中断处理程序的入口
+- ![image-20200805104538057](https://github.com/y-f00l/ucore_lab/tree/master/img/image-20200805104538057.png)16-31位表示了相应的段选择子，根据这个到GDT里找到对应的段描述符拿到中断处理代码的段基地址，然后0-15位,48-63位共同组成了offset，根据这个base addr + offset就找到了中断处理程序的入口
 
 - 编程完善trap.c的中断向量表的初始化函数
   - 注释中让我们使用SETGATE宏，并且引入vector这个变量，vector就是存储了各个中断处理程序入口地址的一个数组，用vector来初始化中断向量表
