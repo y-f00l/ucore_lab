@@ -4,9 +4,9 @@
 
 - Q:操作系统镜像文件ucore.img是如何一步一步生成的？(需要比较详细地解释Makefile中每一条相关命令和命令参数的含义，以及说明命令导致的结果)
 - A:在Makefile里发现了关于生产ucore.img的注释，
-- ![image-20200803205630530](/Users/g1ft/Library/Application Support/typora-user-images/image-20200803205630530.png)
+- ![image-20200803205630530](https://github.com/y-f00l/ucore_lab/edit/master/img/image-20200803205630530.png)
 - 用了dd命令，通过make "V="这个命令查看输出信息，dd命令是从input文件copy到output文件
-- ![image-20200803205815499](/Users/g1ft/Library/Application Support/typora-user-images/image-20200803205815499.png)
+- ![image-20200803205815499](https://github.com/y-f00l/ucore_lab/edit/master/img/image-20200803205815499.png)
 - 分别调用了三次dd命令分别把/dev/zero, bin/bootblock, bin/kernel，这三个copy到ucore.img文件里了。
   - /dev/zero是一个特殊设备文件，读取他的时候他会提供无限的空字符串，可以用作映射匿名的虚拟内存
   - bootblock通过file文件读取发现是一个MBR，也就是主引导记录，他会帮助我们找到bootloader
@@ -32,21 +32,21 @@
 ## exercise 3
 
 - 分析bootloader进入保护模式的过程
-  - ![image-20200804021523064](/Users/g1ft/Desktop/homework/ucore_os/img/image-20200804021523064.png)这里初始化各个段寄存器
-  - ![image-20200804022008642](/Users/g1ft/Desktop/homework/ucore_os/img/image-20200804022008642.png)等待8042(键盘控制器)不busy，0x64是8042的命令端口(0x60端口是数据指令)，然后对其进行写入0xd1，这样是准备写Output端口。随后通过0x60端口写入的字节，会被放置在Output Port中。然后再对0x60写入0xdf，这样0xdf就被放在output port里了，这样就开启了A20
-  - ![image-20200804022725576](/Users/g1ft/Desktop/homework/ucore_os/img/image-20200804022725576.png)这里通过ldgt指令来加载gdt全局描述表，为了进入保护模式做准备(因为gdt就保存的各个段的权限，可以看这里![image-20200804023148505](/Users/g1ft/Desktop/homework/ucore_os/img/image-20200804023148505.png)就对cs段设置了x和r权限，对ds段设置了w权限)。然后余下三条指令就是把cr0的保护模式位设置为1，意为开启保护模式，也就有了分段机制。
+  - ![image-20200804021523064](https://github.com/y-f00l/ucore_lab/edit/master/img/image-20200804021523064.png)这里初始化各个段寄存器
+  - ![image-20200804022008642](https://github.com/y-f00l/ucore_lab/edit/master/img/image-20200804022008642.png)等待8042(键盘控制器)不busy，0x64是8042的命令端口(0x60端口是数据指令)，然后对其进行写入0xd1，这样是准备写Output端口。随后通过0x60端口写入的字节，会被放置在Output Port中。然后再对0x60写入0xdf，这样0xdf就被放在output port里了，这样就开启了A20
+  - ![image-20200804022725576](https://github.com/y-f00l/ucore_lab/edit/master/img/image-20200804022725576.png)这里通过ldgt指令来加载gdt全局描述表，为了进入保护模式做准备(因为gdt就保存的各个段的权限，可以看这里![image-20200804023148505](https://github.com/y-f00l/ucore_lab/edit/master/img/image-20200804023148505.png)就对cs段设置了x和r权限，对ds段设置了w权限)。然后余下三条指令就是把cr0的保护模式位设置为1，意为开启保护模式，也就有了分段机制。
   - 余下的代码就是开启保护模式之后设置好段寄存器，然后跳入bootmain来加载kernel代码
 
 ### exercise 4
 
 - bootloader如何读取磁盘扇区的？
   - bootloader使用了一个函数交readseg
-  - ![image-20200804025312741](/Users/g1ft/Desktop/homework/ucore_os/img/image-20200804025312741.png)
+  - ![image-20200804025312741](https://github.com/y-f00l/ucore_lab/edit/master/img/image-20200804025312741.png)
   - readseg函数首先将va按照sectsize(扇区大小)对齐，根据offset算出在磁盘的哪一个扇区，然后循环调用readsect函数来读取磁盘上的内容
-  - ![image-20200804025340109](/Users/g1ft/Desktop/homework/ucore_os/img/image-20200804025340109.png)
+  - ![image-20200804025340109](https://github.com/y-f00l/ucore_lab/edit/master/img/image-20200804025340109.png)
   - readsect函数首先等待磁盘准备好，然后后面对磁盘的端口进行设置，设置好要读取的扇区号以及读取几次，这里直接就读取1次，因为在readseg里就是按1次来的，然后设置好cmd为0x20(读扇区)后，用insl函数来读取磁盘上的内容到dst，也就是readseg里的va。
 - bootloader是如何加载ELF格式的OS？
-  - ![image-20200804025918323](/Users/g1ft/Desktop/homework/ucore_os/img/image-20200804025918323.png)
+  - ![image-20200804025918323](https://github.com/y-f00l/ucore_lab/edit/master/img/image-20200804025918323.png)
   - 首先读取了磁盘上的第一页，读取到0x10000处，然后对其进行一下检查，看看文件头是否等于ELF的magic number，如果不是elf文件，那么就跳转到bad
   - 如果是的话就找到elf里的program header，通过program header来找到elf里的各个segment磁盘里的offset，然后根据各个offset调用readseg函数来从磁盘中读取ELF的数据。读取完之后就从ELF里的entry开始执行代码，这个时候就跳到kernel的代码了。
 
